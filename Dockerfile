@@ -1,8 +1,13 @@
-FROM openjdk:8-jre-alpine
+# Build Stage
+FROM gradle:8.5-jdk17 AS builder
+WORKDIR /app
+COPY . .
+RUN gradle build --no-daemon
+
+# Run Stage
+FROM eclipse-temurin:17-jdk
+WORKDIR /app
+COPY --from=builder /app/build/libs/*.jar app.jar
 
 EXPOSE 8080
-
-COPY ./build/libs/my-app-1.0-SNAPSHOT.jar /usr/app/
-WORKDIR /usr/app
-
-ENTRYPOINT ["java", "-jar", "my-app-1.0-SNAPSHOT.jar"]
+ENTRYPOINT ["java","-jar","app.jar"]
